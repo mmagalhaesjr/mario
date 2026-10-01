@@ -35,7 +35,7 @@ export default function Jogo() {
     const segundos = useContador(jogoAtivo)
     const { recordes, salvarPontuacao } = usePlacar()
     const ceuEscuro = useTemaCeu(jogoAtivo)
-    const { visivel: bossVisivel, imagem: bossImagem } = useBoss(jogoAtivo)
+    const { visivel: bossVisivel, imagem: bossImagem } = useBoss(ceuEscuro)
     const { bolas, bolaSaiu } = useFogo(bossVisivel)
 
     const duracao = useDificuldade(jogoAtivo)
@@ -84,11 +84,11 @@ export default function Jogo() {
     return (
         <StyledJogo $escuro={ceuEscuro}>
 
-            <Contador>{segundos}s</Contador>
+            <Contador>{segundos}</Contador>
 
             {/* TESTE: mostra a duração atual da travessia do vilão */}
             <Contador style={{ right: 'auto', left: 16 }}>
-                {duracaoAplicada.toFixed(2)}s
+                {duracaoAplicada.toFixed(2)}
             </Contador>
 
             <Nuvem src={nuvem} alt="nuvemimg" />
@@ -140,18 +140,22 @@ export default function Jogo() {
                     transform: `translateX(${x}px) translateY(${-y}px) scaleX(${direcao})`,
                     position: 'absolute',
                     zIndex: jogoAtivo ? 'auto' : 25,
+                    pointerEvents: 'none', // a imagem nunca "rouba" o toque do botão
                 }}
             />
 
             <img id="chao" src={chao} alt="Chão" />
 
-            <Controles
-                onPular={pular}
-                onIniciarEsquerda={iniciarEsquerda}
-                onPararEsquerda={pararEsquerda}
-                onIniciarDireita={iniciarDireita}
-                onPararDireita={pararDireita}
-            />
+            {/* controles só existem enquanto o jogo está rodando */}
+            {jogoAtivo && (
+                <Controles
+                    onPular={pular}
+                    onIniciarEsquerda={iniciarEsquerda}
+                    onPararEsquerda={pararEsquerda}
+                    onIniciarDireita={iniciarDireita}
+                    onPararDireita={pararDireita}
+                />
+            )}
 
             {debugInfo && (
                 <>
@@ -163,7 +167,7 @@ export default function Jogo() {
             {!jogoAtivo && (
                 <GameOverOverlay>
                     <h2>Game Over</h2>
-                    <p>Sua pontuação: {segundos}s</p>
+                    <p>Sua pontuação: {segundos}</p>
                     <ol>
                         {recordes.map((rec, i) => (
                             <li key={i}>

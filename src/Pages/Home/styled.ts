@@ -51,7 +51,6 @@ export const CartaoPersonagem = styled.button`
   flex: 1;
   max-width: 45%;
 
-  border: 2px solid #fff;
  
 
   &:hover {

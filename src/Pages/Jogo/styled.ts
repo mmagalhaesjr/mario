@@ -46,10 +46,10 @@ export const StyledJogo = styled.div<{ $escuro?: boolean }>`
 
 const moverNuvem = keyframes`
   from {
-    transform: translateX(100vw);
+    transform: translateX(100vw); /* começa inteira fora da tela, à direita */
   }
   to {
-    transform: translateX(-150px);
+    transform: translateX(-100%); /* termina inteira fora da tela, à esquerda */
   }
 `
 
@@ -94,7 +94,7 @@ export const Contador = styled.div`
   color: white;
   padding: 6px 14px;
   border-radius: 8px;
-  font-size: 30px;
+  font-size: 40px;
   font-weight: bold;
   font-family: monospace;
   z-index: 10;
