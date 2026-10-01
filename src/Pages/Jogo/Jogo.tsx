@@ -20,7 +20,7 @@ export default function Jogo() {
 
     const { personagem } = usePersonagemEscolhido()
     const { vilaoAtual, sortearNovoVilao } = useVilao()
-    const { pulando, y, pular } = usePular()
+    const { y, pular } = usePular()
     const {
         x,
         direcao,
