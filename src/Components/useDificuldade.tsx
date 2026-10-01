@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 
-const INTERVALO_MS = 1 * 60 * 1000 // 1 minuto
-const REDUCAO_POR_NIVEL = 0.5      // quanto tira da duração a cada aumento
-const DURACAO_MINIMA = 3.5         // nunca fica mais rápido que isso (segundos)
-const DURACAO_INICIAL = 4
+const INTERVALO_MS = 60 * 1000       // 1 minuto
+const AUMENTO_VELOCIDADE = 1.15      // +15% sobre a velocidade atual
+const DURACAO_INICIAL = 4            // segundos
 
 export function useDificuldade(ativo: boolean) {
     const [duracao, setDuracao] = useState(DURACAO_INICIAL)
@@ -12,7 +11,7 @@ export function useDificuldade(ativo: boolean) {
         if (!ativo) return
 
         const intervalo = setInterval(() => {
-            setDuracao((atual) => Math.max(DURACAO_MINIMA, atual - REDUCAO_POR_NIVEL))
+            setDuracao((atual) => atual / AUMENTO_VELOCIDADE)
         }, INTERVALO_MS)
 
         return () => clearInterval(intervalo)

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Nuvem, StyledJogo, ViloesWrapper, Viloes, Contador, GameOverOverlay, DebugCirculo, BossWrapper } from "./styled"
+import { Nuvem, StyledJogo, ViloesWrapper, Viloes, Contador, GameOverOverlay, DebugCirculo, BossWrapper, BolaFogo, FogoWrapper } from "./styled"
 import { usePular } from "../../Components/pular"
 import { useAndar } from "../../Components/andar"
 import { useVilao } from "../../Components/vilao"
@@ -10,10 +10,13 @@ import { usePersonagemEscolhido } from "../../Components/usePersonagemEscolhido"
 import { useTemaCeu } from "../../Components/useTemaCeu"
 import { useBoss } from "../../Components/useBoss"
 import { useMusica } from "../../Components/useMusica"
+import { useFogo } from "../../Components/useFogo"
 import { Controles } from "../../Components/Controle/Controles"
 import chao from '../../assets/chao.png'
 import nuvem from '../../assets/nuvem.png';
+import fogo from '../../assets/fogo.gif'
 import somPerdeu from '../../assets/perdeu.mp3'
+import { useDificuldade } from "../../Components/useDificuldade.tsx"
 
 export default function Jogo() {
     const [jogoAtivo, setJogoAtivo] = useState(true)
@@ -33,21 +36,30 @@ export default function Jogo() {
     const { recordes, salvarPontuacao } = usePlacar()
     const ceuEscuro = useTemaCeu(jogoAtivo)
     const { visivel: bossVisivel, imagem: bossImagem } = useBoss(jogoAtivo)
+    const { bolas, bolaSaiu } = useFogo(bossVisivel)
+
+    const duracao = useDificuldade(jogoAtivo)
+    const [duracaoAplicada, setDuracaoAplicada] = useState(duracao)
+    const [passagem, setPassagem] = useState(0) // conta as travessias do vilão
 
     useMusica(jogoAtivo, bossVisivel)
 
     const marioRef = useRef<HTMLImageElement>(null)
     const vilaoRef = useRef<HTMLImageElement>(null)
+    const fogoRef = useRef<HTMLImageElement>(null)
 
     const onColidir = useCallback(() => {
         setJogoAtivo(false)
         salvarPontuacao(segundos)
 
         const audio = new Audio(somPerdeu)
-        audio.play().catch(() => {})
+        audio.play().catch(() => { })
     }, [segundos, salvarPontuacao])
 
     const debugInfo = useColisao(marioRef, vilaoRef, jogoAtivo, onColidir, 0.25, true)
+
+    // colisão da bola de fogo — mesma lógica do vilão (debug desligado)
+    useColisao(marioRef, fogoRef, jogoAtivo, onColidir, 0.25, false)
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -63,21 +75,60 @@ export default function Jogo() {
         window.location.reload()
     }
 
+    const vilaoSaiuDaTela = () => {
+        setDuracaoAplicada(duracao)   // pega a velocidade mais nova
+        sortearNovoVilao()
+        setPassagem((p) => p + 1)     // muda a key → recria o wrapper e reinicia a animação
+    }
+
     return (
         <StyledJogo $escuro={ceuEscuro}>
 
             <Contador>{segundos}s</Contador>
 
+            {/* TESTE: mostra a duração atual da travessia do vilão */}
+            <Contador style={{ right: 'auto', left: 16 }}>
+                {duracaoAplicada.toFixed(2)}s
+            </Contador>
+
             <Nuvem src={nuvem} alt="nuvemimg" />
 
             <BossWrapper src={bossImagem} alt="Browser" $visivel={bossVisivel} />
 
+            {bolas.map((bola) => (
+                <FogoWrapper
+                    key={bola.id}
+                    $duracao={bola.duracao}
+                    $pausado={!jogoAtivo}
+                    onAnimationEnd={(e) => {
+                        // só conta o fim da animação do wrapper, não a da imagem dentro dele
+                        if (e.target === e.currentTarget) bolaSaiu()
+                    }}
+                >
+                    <BolaFogo
+                        ref={fogoRef}
+                        src={fogo}
+                        alt="Fogo"
+                        $pontosY={bola.pontosY}
+                        $duracao={bola.duracao}
+                        $pausado={!jogoAtivo}
+                    />
+                </FogoWrapper>
+            ))}
+
             <ViloesWrapper
+                key={passagem}
                 $altura={vilaoAtual.altura}
+                $duracao={duracaoAplicada}
                 $pausado={!jogoAtivo}
-                onAnimationIteration={sortearNovoVilao}
+                onAnimationEnd={vilaoSaiuDaTela}
             >
-                <Viloes ref={vilaoRef} src={vilaoAtual.img} alt="Vilão" $width={vilaoAtual.width} />
+                <Viloes
+                    ref={vilaoRef}
+                    src={vilaoAtual.img}
+                    alt={vilaoAtual.nome}
+                    $width={vilaoAtual.width}
+                />
             </ViloesWrapper>
 
             <img
