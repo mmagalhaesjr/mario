@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 export function useColisao(
-    ref1: React.RefObject<HTMLElement>,
-    ref2: React.RefObject<HTMLElement>,
+    ref1: React.RefObject<HTMLElement | null>,
+    ref2: React.RefObject<HTMLElement | null>,
     ativo: boolean,
     onColidir: () => void,
     fatorRaio = 0.4,
