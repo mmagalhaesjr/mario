@@ -8,6 +8,7 @@ const DURACAO_PARADO = 60 * 1000 // fica visível na tela por 1 minuto
 export function useBoss(ativo: boolean) {
     const [visivel, setVisivel] = useState(false)
     const [imagem, setImagem] = useState(browser)
+    
     const timersRef = useRef<number[]>([])
 
     useEffect(() => {
