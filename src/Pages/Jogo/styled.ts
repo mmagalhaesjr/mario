@@ -2,7 +2,7 @@ import styled, { keyframes } from "styled-components"
 
 export const StyledJogo = styled.div<{ $escuro?: boolean }>`
   width: 100%;
-  height: 100vh;
+  height: 90vh;
   position: relative;
   outline: none;
   overflow: hidden;
